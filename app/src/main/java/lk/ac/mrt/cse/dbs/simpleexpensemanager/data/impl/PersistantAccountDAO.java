@@ -18,13 +18,13 @@ import lk.ac.mrt.cse.dbs.simpleexpensemanager.ui.MainActivity;
  */
 public class PersistantAccountDAO implements AccountDAO {
 
-    DBConnector dbCon = MainActivity.dbCon;
+    DBConnector dbCon = MainActivity.connector;
     SQLiteDatabase dbase = dbCon.getWritableDatabase();
 
     @Override
     public List<String> getAccountNumbersList() {
         List<String> accNoList = new ArrayList<String>();
-        Cursor res = dbase.rawQuery("SELECT acc_no FROM accounts", null);
+        Cursor res = dbase.rawQuery("SELECT account_no FROM accounts", null);
         if(res.getCount()>0){
             while(res.moveToNext()){
                 String acc_no = res.getString(0);
@@ -42,14 +42,14 @@ public class PersistantAccountDAO implements AccountDAO {
     @Override
     public List<Account> getAccountsList() {
         List<Account> accList = new ArrayList<Account>();
-        Cursor res = dbase.rawQuery("SELECT acc_no,bank_name,acc_holder_name,balance FROM accounts", null);
+        Cursor res = dbase.rawQuery("SELECT account_no,bank_name,holder_name,balance FROM accounts", null);
         if(res.getCount()>0){
             while(res.moveToNext()){
-                String acc_no = res.getString(0);
+                String account_no = res.getString(0);
                 String bank_name = res.getString(1);
-                String acc_holder_name = res.getString(2);
+                String holder_name = res.getString(2);
                 String balance = res.getString(3);
-                Account acc = new Account(acc_no,bank_name,acc_holder_name,Double.parseDouble(balance));
+                Account acc = new Account(account_no,bank_name,holder_name,Double.parseDouble(balance));
                 accList.add(acc);
             }
             res.close();
@@ -59,16 +59,16 @@ public class PersistantAccountDAO implements AccountDAO {
 
     @Override
     public Account getAccount(String accountNo) throws InvalidAccountException {
-        Cursor res = dbase.rawQuery("SELECT * FROM accounts WHERE acc_no LIKE '" + accountNo + "'", null);
+        Cursor res = dbase.rawQuery("SELECT * FROM accounts WHERE account_no LIKE '" + accountNo + "'", null);
         if (res != null) {
-            String acc_no = res.getString(0);
+            String account_no = res.getString(0);
             String bank_name = res.getString(1);
             String holder_name = res.getString(2);
             String balance = res.getString(3);
-            Account c = new Account(acc_no, bank_name, holder_name, Double.parseDouble(balance));
-            return c;
+            Account acc = new Account(account_no, bank_name, holder_name, Double.parseDouble(balance));
+            return acc;
         }else {
-            String msg = "Account " + accountNo + " is invalid.";
+            String msg = accountNo + " is not a valid Account number";
             throw new InvalidAccountException(msg);
         }
 
@@ -76,12 +76,12 @@ public class PersistantAccountDAO implements AccountDAO {
 
     @Override
     public void addAccount(Account account) {
-        Cursor res = dbase.rawQuery("SELECT * FROM accounts WHERE acc_no LIKE '"+account.getAccountNo()+"'",null);
+        Cursor res = dbase.rawQuery("SELECT * FROM accounts WHERE account_no LIKE '"+account.getAccountNo()+"'",null);
         if(res.getCount()>0){
 
         }else{
             ContentValues cv = new ContentValues();
-            cv.put("acc_no",account.getAccountNo());
+            cv.put("account_no",account.getAccountNo());
             cv.put("bank_name",account.getBankName());
             cv.put("holder_name",account.getAccountHolderName());
             cv.put("balance",account.getBalance());
@@ -93,7 +93,7 @@ public class PersistantAccountDAO implements AccountDAO {
 
     @Override
     public void removeAccount(String accountNo) throws InvalidAccountException {
-        dbase.delete("accounts","acc_no = ?",new String[] {accountNo});
+        dbase.delete("accounts","account_no = ?",new String[] {accountNo});
     }
 
     @Override
@@ -101,9 +101,9 @@ public class PersistantAccountDAO implements AccountDAO {
         Cursor res;
         String val="";
         ContentValues values;
-        res = dbase.rawQuery("SELECT acc_no FROM accounts WHERE acc_no LIKE '"+accountNo+"'",null);
+        res = dbase.rawQuery("SELECT account_no FROM accounts WHERE account_no LIKE '"+accountNo+"'",null);
         if(res.getCount()>0){
-            Cursor getbal = dbase.rawQuery("SELECT balance FROM accounts WHERE acc_no LIKE '"+accountNo+"'",null);
+            Cursor getbal = dbase.rawQuery("SELECT balance FROM accounts WHERE account_no LIKE '"+accountNo+"'",null);
             if(getbal.moveToFirst()){
                 while(!getbal.isAfterLast()){
                     val = getbal.getString(getbal.getColumnIndex("balance"));
@@ -116,17 +116,17 @@ public class PersistantAccountDAO implements AccountDAO {
                     newBal = Double.toString(Double.parseDouble(val)-amount);
                     values= new ContentValues();
                     values.put("balance",newBal);
-                    dbase.update("accounts",values,"acc_no = ?",new String[] {accountNo});
+                    dbase.update("accounts",values,"account_no = ?",new String[] {accountNo});
                     break;
                 case INCOME:
                     newBal = Double.toString(Double.parseDouble(val)+amount);
                     values = new ContentValues();
                     values.put("balance",newBal);
-                    dbase.update("accounts",values,"acc_no = ?",new String[] {accountNo});
+                    dbase.update("accounts",values,"account_no = ?",new String[] {accountNo});
                     break;
             }
         }else{
-            String msg = "Account " + accountNo + " is invalid.";
+            String msg =  accountNo + " is not a valid Account number";
             throw new InvalidAccountException(msg);
         }
 

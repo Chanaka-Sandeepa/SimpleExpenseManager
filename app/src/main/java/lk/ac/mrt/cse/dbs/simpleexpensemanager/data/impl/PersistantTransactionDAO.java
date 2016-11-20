@@ -20,14 +20,14 @@ import lk.ac.mrt.cse.dbs.simpleexpensemanager.ui.MainActivity;
  */
 public class PersistantTransactionDAO implements TransactionDAO {
 
-    DBConnector dbCon = MainActivity.dbCon;
+    DBConnector dbCon = MainActivity.connector;
     SQLiteDatabase dbase = dbCon.getWritableDatabase();
 
     List<Transaction> transList;
 
     @Override
     public void logTransaction(Date date, String accountNo, ExpenseType expenseType, double amount){
-        Cursor res = dbase.rawQuery("SELECT acc_no FROM accounts WHERE acc_no LIKE '"+accountNo+"'",null);
+        Cursor res = dbase.rawQuery("SELECT account_no FROM accounts WHERE account_no LIKE '"+accountNo+"'",null);
         if(res.getCount()>0){
             ContentValues content = new ContentValues();
             content.put("date", date.toString());
@@ -50,7 +50,7 @@ public class PersistantTransactionDAO implements TransactionDAO {
         if(res.getCount()>0){
             while(res.moveToNext()){
                 String date = res.getString(res.getColumnIndex("date"));
-                String acc_no = res.getString(res.getColumnIndex("account_no"));
+                String account_no = res.getString(res.getColumnIndex("account_no"));
                 String type = res.getString(res.getColumnIndex("type"));
                 String amount = res.getString(res.getColumnIndex("amount"));
                 if(type.equalsIgnoreCase("EXPENSE")){
@@ -65,7 +65,7 @@ public class PersistantTransactionDAO implements TransactionDAO {
                 } catch (ParseException e1) {
                     e1.printStackTrace();
                 }
-                Transaction t = new Transaction(date2,acc_no,e,Double.parseDouble(amount));
+                Transaction t = new Transaction(date2,account_no,e,Double.parseDouble(amount));
                 transList.add(t);
             }
 

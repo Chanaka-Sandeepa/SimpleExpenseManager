@@ -19,7 +19,7 @@ public class DBConnector extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE accounts(account_no varchar(60) primary key not null,bank_name varchar(50) not null," +
                 "holder_name varchar(50) not null,balance double precision not null)");
-        db.execSQL("CREATE TABLE transactions(date varchar(50) not null,acc0unt_no varchar(60) not null,type varchar(50) not null," +
+        db.execSQL("CREATE TABLE transactions(date varchar(50) not null,account_no varchar(60) not null,type varchar(50) not null," +
                 "amount double precision not null)");
 
     }
